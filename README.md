@@ -19,7 +19,7 @@ Want to try it? Here's how:
 
 ```bash
 # Clone this bad boy
-git clone <this-repo>
+git clone https://github.com/zsxkib/cog-Hunyuan-Avatar.git
 cd hunyuan-avatar-cog
 
 # Run a prediction (grab a coffee... or three)
