@@ -1,6 +1,45 @@
 # HunyuanVideo-Avatar Replicate Cog
 
-This is a Replicate Cog implementation of **HunyuanVideo-Avatar**, a state-of-the-art audio-driven lip sync model that generates high-quality, dynamic videos with precise emotion alignment and character consistency.
+This is a **working** Replicate Cog implementation of **HunyuanVideo-Avatar**, a state-of-the-art audio-driven lip sync model that generates high-quality, dynamic videos with precise emotion alignment and character consistency.
+
+## 🚨 Important Reality Check
+
+**This thing works, but it's SLOW AS HELL.** I'm talking 13+ minutes for a 2-step inference with ~5 seconds of audio. The model is absolutely incredible (seriously, the demos from Hunyuan are mind-blowing), but the inference time makes it impractical for most use cases.
+
+I'm not pushing this to Replicate's platform because:
+- 30-minute timeout limit (this easily exceeds that)
+- Would cost users a fortune in GPU time
+- Nobody wants to wait 20+ minutes for a lip-sync video
+
+But hey, if you want to run it locally and have the patience of a saint, it's all here and working! 🎉
+
+## Local Usage (The Real Deal)
+
+Want to try it? Here's how:
+
+```bash
+# Clone this bad boy
+git clone <this-repo>
+cd hunyuan-avatar-cog
+
+# Run a prediction (grab a coffee... or three)
+sudo cog predict -i image=@assets/image/src1.png -i audio=@assets/audio/4.WAV -i prompt="a person delivering a calm, reassuring message" -i num_inference_steps=2
+```
+
+**Pro tip:** Start with `num_inference_steps=2` unless you want to age a few years waiting. Even with 2 steps, you're looking at 10-15+ minutes on decent hardware.
+
+The script will automagically:
+- Download all the weights (~30GB+ of models)
+- Set up the environment 
+- Process your inputs
+- Generate your video (eventually)
+
+## 🔥 Performance Reality
+
+- **Generation Time**: 10-20+ minutes for ~5 seconds of video (yes, really)
+- **GPU Memory**: Needs ~30GB+ VRAM (tested on A100-80GB)
+- **Model Quality**: Actually incredible when it finishes
+- **Patience Required**: Zen master level
 
 ## Overview
 
@@ -18,7 +57,7 @@ HunyuanVideo-Avatar is capable of:
 - **`audio`** (Path): Audio file to drive the lip sync (.wav, .mp3, etc.)
 - **`prompt`** (str): Text prompt to guide the generation (default: "a person is speaking naturally")
 - **`fps`** (int): Output video frame rate (default: 25, range: 20-30)
-- **`num_inference_steps`** (int): Number of denoising steps (default: 50, range: 20-100)
+- **`num_inference_steps`** (int): Number of denoising steps (default: 50, range: 2-100) - **START WITH 2!**
 - **`guidance_scale`** (float): Guidance scale for generation quality (default: 7.5, range: 1.0-20.0)
 - **`seed`** (int, optional): Random seed for reproducible results
 
@@ -26,33 +65,26 @@ HunyuanVideo-Avatar is capable of:
 
 - **Video file**: MP4 video with the animated face lip-synced to the provided audio
 
-### Example Usage
+### Example Usage (Local Only)
 
-```python
-import replicate
+```bash
+# Basic usage
+cog predict -i image=@path/to/face.jpg -i audio=@path/to/speech.wav
 
-output = replicate.run(
-    "your-username/hunyuan-avatar:version-hash",
-    input={
-        "image": open("portrait.jpg", "rb"),
-        "audio": open("speech.wav", "rb"),
-        "prompt": "a person speaking with natural expressions",
-        "fps": 25,
-        "num_inference_steps": 50,
-        "guidance_scale": 7.5,
-        "seed": 12345
-    }
-)
-
-# Download the generated video
-video_url = output
+# With custom settings (still slow!)
+cog predict \
+  -i image=@assets/image/src1.png \
+  -i audio=@assets/audio/4.WAV \
+  -i prompt="a person delivering a calm, reassuring message" \
+  -i num_inference_steps=2 \
+  -i guidance_scale=7.5
 ```
 
 ## Technical Details
 
 ### Model Architecture
 
-This implementation is based on the HunyuanVideo-Avatar paper and includes:
+This implementation includes:
 
 1. **Character Image Injection Module**: Ensures dynamic motion while maintaining character consistency
 2. **Audio Emotion Module (AEM)**: Extracts and transfers emotional cues from audio
@@ -63,8 +95,8 @@ This implementation is based on the HunyuanVideo-Avatar paper and includes:
 
 - **High-Quality Output**: Generates videos up to 704x1216 resolution
 - **Long Video Support**: Can generate up to 129 frames (~5 seconds at 25fps)
-- **Optimized Inference**: Uses FP8 quantization and GPU optimizations for faster generation
-- **Memory Efficient**: Supports CPU offloading for lower VRAM requirements
+- **FP8 Optimization**: Uses quantized weights for (slightly) better performance
+- **Memory Efficient**: Supports single GPU inference
 
 ## Input Guidelines
 
@@ -89,16 +121,29 @@ This implementation is based on the HunyuanVideo-Avatar paper and includes:
 
 ## Performance Considerations
 
-- **Generation Time**: ~30-60 seconds depending on video length and settings
-- **GPU Memory**: Requires ~24GB VRAM for full quality, optimized for 80GB
-- **Quality vs Speed**: Higher `num_inference_steps` = better quality but longer generation time
+- **Generation Time**: Seriously, it's slow. Like, really slow. 
+- **GPU Memory**: Requires ~30GB+ VRAM (A100-80GB recommended)
+- **Quality vs Speed**: Higher `num_inference_steps` = better quality but exponentially longer wait times
+- **Cost**: If this were on Replicate, it would cost $20+ per generation
 
 ## Limitations
 
+- **Speed**: Did I mention it's slow?
+- **Memory**: Needs beefy hardware
+- **Audio length**: Longer audio = longer wait times
 - Optimal results with clear, front-facing portraits
-- Audio length affects generation time and memory usage
-- Very long audio clips may be truncated
 - Complex backgrounds or extreme poses may affect quality
+
+## Contributing
+
+**Want to make this faster?** PRs are absolutely welcome! Some ideas:
+- Better memory optimization
+- Multi-GPU support improvements
+- TensorRT optimization
+- Quantization improvements
+- Any other speed optimizations you can think of
+
+This model has incredible potential but needs some serious optimization love.
 
 ## Citation
 
@@ -120,22 +165,10 @@ If you use this model, please cite the original paper:
 
 This implementation follows the original HunyuanVideo-Avatar license terms. Please refer to the original repository for detailed licensing information.
 
-## Development
+## Final Words
 
-To build and test this Cog locally:
+This is a working implementation of an absolutely incredible model. The quality is genuinely mind-blowing when you see the results. It's just... really, really slow right now. But hey, that's what makes it a fun challenge for optimization! 
 
-```bash
-# Install cog
-curl -o /usr/local/bin/cog -L https://github.com/replicate/cog/releases/latest/download/cog_`uname -s`_`uname -m`
-chmod +x /usr/local/bin/cog
+If you've got ideas to make this faster, please contribute. The ML community needs more working implementations of cutting-edge models, even if they start out slower than we'd like.
 
-# Build the model
-cog build -t hunyuan-avatar
-
-# Test prediction
-cog predict -i image=@portrait.jpg -i audio=@speech.wav -i prompt="a person speaking naturally"
-```
-
-## Support
-
-For issues specific to this Replicate implementation, please open an issue in this repository. For questions about the underlying HunyuanVideo-Avatar model, refer to the [original repository](https://github.com/Tencent/HunyuanVideo-Avatar).
+Now go grab some coffee and generate some amazing lip-sync videos! ☕️
