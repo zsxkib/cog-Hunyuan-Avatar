@@ -7,9 +7,8 @@ This is a **working** Replicate Cog implementation of **HunyuanVideo-Avatar**, a
 **This thing works, but it's SLOW AS HELL.** I'm talking 13+ minutes for a 2-step inference with ~5 seconds of audio. The model is absolutely incredible (seriously, the demos from Hunyuan are mind-blowing), but the inference time makes it impractical for most use cases.
 
 I'm not pushing this to Replicate's platform because:
-- 30-minute timeout limit (this easily exceeds that)
 - Would cost users a fortune in GPU time
-- Nobody wants to wait 20+ minutes for a lip-sync video
+- Nobody wants to wait 60+ minutes for a lip-sync video (and pay an arm and a leg)
 
 But hey, if you want to run it locally and have the patience of a saint, it's all here and working! 🎉
 
